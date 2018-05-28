@@ -3,7 +3,7 @@ Main info requested
 
 Installation steps
 -------------------
-1) install and configure
+1) install and configure mysql
 2) install and configure webserver (should point into /web directory)
 3) run composer install
 4) run composer update
