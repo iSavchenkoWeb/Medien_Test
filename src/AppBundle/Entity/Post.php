@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @ORM\Table(name="`post`")
  * @ORM\Entity(repositoryClass="AppBundle\Repository\PostRepository")
+ * @ORM\HasLifecycleCallbacks()
  */
 class Post
 {
@@ -35,6 +36,13 @@ class Post
      */
     private $createdAt;
 
+    /**
+     * Author of the comment
+     *
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\User")
+     * @var User
+     */
+    protected $author;
 
     /**
      * Get id
@@ -92,6 +100,37 @@ class Post
     public function getCreatedAt()
     {
         return $this->createdAt;
+    }
+
+    /**
+     * @ORM\PrePersist
+     * @ORM\PreUpdate
+     */
+    public function updatedTimestamps()
+    {
+        if($this->getCreatedAt() == null)
+        {
+            $this->setCreatedAt(new \DateTime('now'));
+        }
+    }
+
+    public function setAuthor($author)
+    {
+        $this->author = $author;
+    }
+
+    public function getAuthor()
+    {
+        return $this->author;
+    }
+
+    public function getAuthorName()
+    {
+        if (null === $this->getAuthor()) {
+            return 'Anonymous';
+        }
+
+        return $this->getAuthor()->getUsername();
     }
 }
 

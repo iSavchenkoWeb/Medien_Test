@@ -17,3 +17,8 @@ parameters:
 
     # A secret key that's used to generate certain security-related tokens
     secret: ThisTokenIsNotSoSecretChangeIt
+
+    #Redis settings
+    redis_host: localhost
+    redis_port: 6379
+    redis_password: 

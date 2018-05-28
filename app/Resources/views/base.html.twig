@@ -2,17 +2,66 @@
 <html>
     <head>
         <meta charset="UTF-8" />
-        <title>{% block title %}Welcome!{% endblock %}</title>
+        <title>{% block title %}Main{% endblock %}</title>
         {% block stylesheets %}{% endblock %}
-
-        <link href="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
-        <script src="https://code.jquery.com/jquery-1.12.4.min.js" crossorigin="anonymous"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" crossorigin="anonymous"></script>
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
     </head>
+ 
     <body>
-        <br>
-        {% block body %}{% endblock %}
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+        <script src = "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> 
+        {% block javascripts %}
+            <script type="text/javascript">
+                /*base functionality*/
+                    //sprintf for js
+                    if (!String.prototype.format) {
+                      String.prototype.format = function() {
+                        var args = arguments;
+                        return this.replace(/{(\d+)}/g, function(match, number) { 
+                          return typeof args[number] != 'undefined'
+                            ? args[number]
+                            : match
+                          ;
+                        });
+                      };
+                    }
 
-        {% block javascripts %}{% endblock %}
+                    //highlight an object (upon input error, f.e.)
+                    function highlight(selector, checker=null, time=5)
+                    {
+                        var previous_border = $(selector).css('border');
+                        $(selector).css({border: '2px solid #ED7070'});
+                        var tmt = setTimeout(function(){
+                            $(selector).css({border: previous_border});
+                        }, time*1000);
+
+                        if(checker)
+                        {
+                            $(selector).keydown(function(){checker(this, previous_border);});
+                        }
+                    }
+
+                    //Y-m-d H:i:s
+                    function formatDate(date) {
+                        var d = new Date(date),
+                            month = '' + (d.getMonth() + 1),
+                            day = '' + d.getDate(),
+                            year = d.getFullYear(),
+                            minute = d.getMinutes(),
+                            hour = d.getHours(),
+                            second = d.getSeconds();
+
+                        if (month.length < 2) month = '0' + month;
+                        if (day.length < 2) day = '0' + day;
+
+                        return [year, month, day].join('-')+' '+hour+':'+minute+':'+second;
+                    }
+            </script>
+        {% endblock %}
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
     </body>
 </html>

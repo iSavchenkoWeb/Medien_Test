@@ -28,7 +28,15 @@ services:
         resource: '../../src/AppBundle/Controller'
         public: true
         tags: ['controller.service_arguments']
-
+    appbundle.acl.comment.roles:
+        class: AppBundle\Acl\RoleCommentAcl
+        public: false
+        arguments: ['@security.authorization_checker', '@security.token_storage', IS_AUTHENTICATED_ANONYMOUSLY, IS_AUTHENTICATED_ANONYMOUSLY, ROLE_ADMIN, ROLE_ADMIN, '%fos_comment.model.comment.class%']
+    app.cache:
+        class: Symfony\Component\Cache\Adapter\TagAwareAdapter
+        public: true
+        decorates: cache.app
+        arguments: ['@app.cache.inner', '@app.cache.inner']
     # add more services, or override services that need manual wiring
     # AppBundle\Service\ExampleService:
     #     arguments:
