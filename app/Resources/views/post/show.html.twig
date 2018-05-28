@@ -1,1 +1,89 @@
-post {{ post.id }}
+{% extends "@FOSUser/layout.html.twig" %}
+{% block stylesheets %}<link rel="stylesheet" href="{{ asset('bundles/foscomment/css/comments.css') }}" /><style>.fos_comment_comment_replies{margin-left: 15px;}</style>{% endblock %}
+{% block javascripts %}
+	{% if owner == 1 %}
+		<script type="text/javascript">
+			$(document).ready(function(){
+				$('.editPost').click(function(){
+					var postID = $(this).data('id');
+					$(this).hide();
+					$('.savePost[data-id='+postID+']').show();
+					$('.post-content[data-id='+postID+']').removeAttr('disabled');
+				});
+
+				$('.removePost').click(function(){
+					var postID = $(this).data('id');
+					if(window.confirm('Are you willing to completely remove post '+postID+'?'))
+					{
+						$.ajax({
+	                        method: "DELETE",
+	                        url: "/api/post/"+postID
+	                    }).done(function( msg ) {
+	                    	if(msg.success)
+	                    		location.href = '/posts';
+		                });
+					}
+				});
+
+				$('.savePost').click(function(){
+					var postID = $(this).data('id');
+					var post_content_el = $('.post-content[data-id='+postID+']');
+
+					if(post_content_el.val().length <= 2)
+					{
+						highlight('.post-content[data-id='+postID+']', function(elem, previous_border){
+	                        if(elem.value.length >= 2){ 
+	                            $(elem).css({border: previous_border});
+	                        }
+	                    });
+	                    return false;
+					}
+					$.ajax({
+                        method: "POST",
+                        url: "/api/post/"+postID,
+                        data: { 
+                            appbundle_post: {
+                                content: post_content_el.val(),
+                                _token: $('#csrf_token').val(),
+                                submit: 1
+                            }
+                        }
+                    }).done(function( msg ) {
+                    	$(this).hide();
+						$('.editPost[data-id='+postID+']').show();
+						$('.savePost[data-id='+postID+']').hide();
+						post_content_el.attr('disabled', 1);
+	                });
+				});
+			});
+
+			function highlight(selector, checker=null, time=5)
+		    {
+		        var previous_border = $(selector).css('border');
+		        $(selector).css({border: '2px solid #ED7070'});
+		        var tmt = setTimeout(function(){
+		            $(selector).css({border: previous_border});
+		        }, time*1000);
+
+		        if(checker)
+		        {
+		            $(selector).keydown(function(){checker(this, previous_border);});
+		        }
+		    }
+		</script>
+	{% endif %}
+{% endblock %}
+{% block fos_user_content %}
+	<input type='hidden' style='display: none;' id='csrf_token' value='{{ csrf_token }}'>
+	<a href = "{{ path('posts') }}">Back to posts</a><br>
+	POST: {{ post.id }}<br>
+	CREATED BY: {{ post.author }} AT {{ post.createdAt|date('Y-m-d H:i:s') }}<br>
+	{% if owner == 1 %}
+		<button class='savePost' data-id='{{ post.id }}' style='margin-bottom: 10px; display: none;'>Save</button>
+		<button class='editPost' data-id='{{ post.id }}' style='margin-bottom: 10px;'>Edit</button>
+		<button class='removePost' data-id='{{ post.id }}' style='margin-bottom: 10px;'>Remove</button><br>
+
+	{% endif %}
+	<textarea class='form-control post-content' data-id='{{ post.id }}' disabled="1">{{ post.content }}</textarea><br>
+	{% include '@FOSComment/Thread/async.html.twig' with {'id': 'post_' ~ post.id} %}
+{% endblock %}
