@@ -5,10 +5,10 @@ Installation steps
 -------------------
 1) install and configure mysql
 2) install and configure webserver (should point into /web directory)
-3) run composer install
-4) run composer update
-5) php bin/console doctrine:schema:update --force
-6) run ./vendor/phpunit, check if no errors on tests
+3) run `composer install`
+4) run `composer update`
+5) `php bin/console doctrine:schema:update --force`
+6) run `./vendor/phpunit`, check if no errors on tests
 
 You are free to go with APP :)
 
