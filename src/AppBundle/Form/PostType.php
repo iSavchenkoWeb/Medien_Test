@@ -21,7 +21,7 @@ class PostType extends AbstractType
                 'label' => false
             ])
             ->add('submit', SubmitType::class, [
-                'label' => 'Create',
+                'label' => 'Post',
                 'attr' => [
                     'id' => 'submit-post-btn'
                 ]
