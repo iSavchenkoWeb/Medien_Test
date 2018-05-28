@@ -1,0 +1,39 @@
+{% extends '::base.html.twig' %}
+
+{% block body %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-12">
+                <div id="create-post-form">
+                    {{ form(postForm) }}
+                    <br>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12">
+                {% for post in posts if posts|length > 0 %}
+                    <div class="post">
+                        <p>{{ post.content }}</p>
+
+                        <div class="comments">
+
+                        </div>
+                    </div>
+                {% endfor %}
+
+                {% if posts|length == 0 %}
+                    <div>No posts yet</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        $(function() {
+
+        })
+    </script>
+{% endblock %}
