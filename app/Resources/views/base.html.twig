@@ -43,6 +43,10 @@
                         }
                     }
 
+                    function htmlEntities(str) {
+                        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                    }
+
                     //Y-m-d H:i:s
                     function formatDate(date) {
                         var d = new Date(date),

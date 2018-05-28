@@ -11,10 +11,13 @@
             $('#appbundle_post_submit').click(function(){
                 var post_content = $('#appbundle_post_content').val();
                 var post_token = $('#appbundle_post__token').val();
-                if(post_content.length < 2)
+                if(post_content.length < 2 || post_content.length > 255)
                 {
+                    if(post_content.length > 255)
+                        $('#appbundle_post_content').val(post_content.substr(0, 255));
+
                     highlight('#appbundle_post_content', function(elem, previous_border){
-                        if(elem.value.length >= 2){ 
+                        if(elem.value.length >= 2 && elem.value.length <= 255){ 
                             $(elem).css({border: previous_border});
                         }
                     });
@@ -60,7 +63,7 @@
                                         </section> \
                                     </li> \
                                 </a>';
-            var post_html = template.format(post.id, post.author.username, post.content, formatDate(new Date(post.created_at)));
+            var post_html = template.format(post.id, post.author.username, htmlEntities(post.content), formatDate(new Date(post.created_at)));
             $('#posts').prepend(post_html);
 
         }
