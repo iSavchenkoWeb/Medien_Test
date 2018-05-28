@@ -8,8 +8,10 @@ Installation steps
 3) run `composer install`
 4) run `composer update`
 5) `php bin/console doctrine:schema:update --force`
-6) run `./vendor/bin/phpunit`, check if no errors on tests
-7) If you use linux and apache, execute those commands to set right repository permissions:
+6) `php bin/console cache:clear -e prod`
+7) run `./vendor/bin/phpunit`, check if no errors on tests
+
+8) If you use linux and apache, execute those commands to set right repository permissions:
 `sudo find var -type d -exec chmod 777 {} \;`
 `sudo find var -type f -exec chmod 666 {} \;`
 

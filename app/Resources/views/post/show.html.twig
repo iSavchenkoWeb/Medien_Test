@@ -8,7 +8,7 @@
 					var postID = $(this).data('id');
 					$(this).hide();
 					$('.savePost[data-id='+postID+']').show();
-					$('.post-content[data-id='+postID+']').removeAttr('disabled');
+					$('.post-content[data-id='+postID+']').removeAttr('readonly');
 				});
 
 				$('.removePost').click(function(){
@@ -29,15 +29,19 @@
 					var postID = $(this).data('id');
 					var post_content_el = $('.post-content[data-id='+postID+']');
 
-					if(post_content_el.val().length <= 2)
-					{
-						highlight('.post-content[data-id='+postID+']', function(elem, previous_border){
-	                        if(elem.value.length >= 2){ 
+					if(post_content_el.val().length < 2 || post_content_el.val().length > 255)
+	                {
+	                    if(post_content_el.val().length > 255)
+	                       post_content_el.val(post_content_el.val().substr(0, 255));
+
+	                    highlight('.post-content[data-id='+postID+']', function(elem, previous_border){
+	                        if(elem.value.length >= 2 && elem.value.length <= 255){ 
 	                            $(elem).css({border: previous_border});
 	                        }
 	                    });
 	                    return false;
-					}
+                	}
+
 					$.ajax({
                         method: "POST",
                         url: "/api/post/"+postID,
@@ -52,7 +56,7 @@
                     	$(this).hide();
 						$('.editPost[data-id='+postID+']').show();
 						$('.savePost[data-id='+postID+']').hide();
-						post_content_el.attr('disabled', 1);
+						post_content_el.attr('readonly', 1);
 	                });
 				});
 			});
@@ -84,6 +88,6 @@
 		<button class='removePost' data-id='{{ post.id }}' style='margin-bottom: 10px;'>Remove</button><br>
 
 	{% endif %}
-	<textarea class='form-control post-content' data-id='{{ post.id }}' disabled="1">{{ post.content }}</textarea><br>
+	<textarea class='form-control post-content' data-id='{{ post.id }}' readonly="1">{{ post.content }}</textarea><br>
 	{% include '@FOSComment/Thread/async.html.twig' with {'id': 'post_' ~ post.id} %}
 {% endblock %}
