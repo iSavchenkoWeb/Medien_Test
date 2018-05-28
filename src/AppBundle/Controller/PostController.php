@@ -182,6 +182,91 @@
 		}
 
 		/**
+		 * @Rest\Post("/api/post/{id}") 
+		*/
+		public function editPostAction($id, Request $request) {
+			$id = (float)($id);
+			if(!($id > 0))
+			{
+				throw new NotFoundHttpException(sprintf('Wrong id: (%s)', $id));
+			}
+
+			$post = $this->getPostAction($id);
+
+			if ($post->getAuthor() != $this->get('security.token_storage')->getToken()->getUser()) {
+				throw new NotFoundHttpException(sprintf('No such post (2) (%s)', $id));
+			}
+
+			if(!isset($post))
+			{
+				throw new NotFoundHttpException(sprintf('No such post (%s)', $id));
+			}
+			try 
+	        {
+	        	$form = $this->createForm(PostType::class);
+	            $form->handleRequest($request);
+	            if ($form->isValid()) {
+	            	$data = $form->getData();
+					$em = $this->getDoctrine()->getManager();
+					$em->getConnection()->beginTransaction();
+
+					$post->setContent($data->getContent());
+					
+					$em->merge($post);
+					$em->flush();
+					$em->getConnection()->commit();
+		            $this->cache->invalidateTags(['posts']);
+		            return array('post' => $post);
+		        }
+		        else {
+		        	throw new HttpException(500, "Wrong post data");
+		        }
+	        }
+	        catch(Exception $e)
+	        {
+	            $em->getConnection()->rollBack();
+	            throw $e;
+	        }
+		}
+
+		 /**
+		 * @Rest\Delete("/api/post/{id}") 
+		*/
+		public function removePostAction($id, Request $request) {
+			$id = (float)($id);
+			if(!($id > 0))
+			{
+				throw new NotFoundHttpException(sprintf('Wrong id: (%s)', $id));
+			}
+
+			$post = $this->getPostAction($id);
+
+			if ($post->getAuthor() != $this->get('security.token_storage')->getToken()->getUser()) {
+				throw new NotFoundHttpException(sprintf('No such post (2) (%s)', $id));
+			}
+
+			if(!isset($post))
+			{
+				throw new NotFoundHttpException(sprintf('No such post (%s)', $id));
+			}
+			$em = $this->getDoctrine()->getManager();
+			$em->getConnection()->beginTransaction();
+			try 
+	        {
+				$em->remove($post);
+				$em->flush();
+				$em->getConnection()->commit();
+	            $this->cache->invalidateTags(['posts']);
+	            return array('success' => true);
+	        }
+	        catch(Exception $e)
+	        {
+	            $em->getConnection()->rollBack();
+	            throw $e;
+	        }
+		}
+		
+		/**
 		 * This method controls paging and return offset/count numbers based on request
 		 */
 		private function getPageParams(Request $request): Array

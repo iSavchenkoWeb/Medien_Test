@@ -1,7 +1,5 @@
 {% extends "@FOSUser/layout.html.twig" %}
-{% stylesheets '@FOSCommentBundle/Resources/public/css/comments.css' %}
-<link rel="stylesheet" href="{{ asset_url }}" type="text/css" />
-{% endstylesheets %}
+{% block stylesheets %}<link rel="stylesheet" href="{{ asset('bundles/foscomment/css/comments.css') }}" /><style>.fos_comment_comment_replies{margin-left: 15px;}</style>{% endblock %}
 {% block javascripts %}
 	{% if owner == 1 %}
 		<script type="text/javascript">
