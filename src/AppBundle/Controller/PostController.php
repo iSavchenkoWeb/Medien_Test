@@ -68,8 +68,26 @@
 	     */
 	    public function postAction($id)
 	    {
+	    	$post = $this->getPostAction($id);
+	    	if (!$post) {
+				throw new NotFoundHttpException(sprintf('Post \'%s\' was not found.', $id));
+			}
+			$owner = 0;
+			if ($post->getAuthor() == $this->get('security.token_storage')->getToken()->getUser()) {
+				$owner = 1;
+			}
+	    	$csrf = $this->get('security.csrf.token_manager');
+	    	$postForm = $this->createForm(PostType::class, new Post());
+			$intention = $postForm->getName();
+			$token = $csrf->getToken($intention)->getValue();
+
+	        return $this->render('post/show.html.twig', [
+	            'post' => $post,
+	            'csrf_token' => $token,
+	            'owner' => $owner
+	        ]);
 	    }
-	    
+
 	    /**
 		 * @Rest\Get("/api/posts") 
 		*/
@@ -112,6 +130,55 @@
 
 			$this->cache->save($cacheItem);
 			return $result;
+		}
+
+		/**
+		 * @Rest\Post("/api/posts") 
+		*/
+		public function addPostAction(Request $request) {
+			$em = $this->getDoctrine()->getManager();
+	        $em->getConnection()->beginTransaction();
+	        $newPost = new Post();
+	        try 
+	        {
+	            $form = $this->createForm(PostType::class, $newPost);
+
+	            $form->handleRequest($request);
+	            if ($form->isSubmitted() && $form->isValid()) {
+	                $data = $form->getData();
+
+	                $newPost->setAuthor($this->container->get('security.token_storage')->getToken()->getUser());
+	                $em = $this->getDoctrine()->getManager();
+	                $em->persist($newPost);
+	                $em->flush();
+	                $em->getConnection()->commit();
+
+	                $this->cache->invalidateTags(['posts']);
+	                return array('post' => $newPost);
+	            }
+	        }
+	        catch(Exception $e)
+	        {
+	            $em->getConnection()->rollBack();
+	            throw $e;
+	        }
+	    }
+		/**
+		 * @Rest\Get("/api/post/{id}") 
+		*/
+		public function getPostAction($id) {
+			$postsRepository = $this->getDoctrine()->getRepository('AppBundle:Post');
+			$post = NULL;
+			try {
+				$post = $postsRepository->find($id);
+			} catch (\Exception $exception) {
+				$post = NULL;
+			}
+
+			if (!$post) {
+				throw new NotFoundHttpException(sprintf('Post \'%s\' was not found.', $id));
+			}
+			return $post;
 		}
 
 		/**
