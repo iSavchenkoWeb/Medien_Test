@@ -22,12 +22,15 @@ So i checked what changed in new versions of Symfony, but i had like an hour on 
 Answering your question, what i did about performance optimization:
 1) connected APP to Redis; 
 2) moved sessions to Redis;
-3) enabled doctrine to use Redis as cach;
+3) enabled doctrine to use Redis as cache;
 4) in a most huge request - posts list (api/posts) i enabled object caching using Redis.
 
 Also, for performance increase i configured mysql server to use query cache (SET GLOBAL query_cache_type = 1;)
 
 For adding comments i decided to use bundle, that provides all requested functionality (FOSUserBundle).
+
+Main controller, that contains all methods to work with posts (and API) - `src/Controller/PostController.php`.
+Also, you may check commits log, to have an idea about process of task implementation.
 
 Thank you for your time and i hope that my solution will fit your needs!
 
