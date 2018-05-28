@@ -27,10 +27,11 @@ Answering your question, what i did about performance optimization:
 
 Also, for performance increase i configured mysql server to use query cache (SET GLOBAL query_cache_type = 1;)
 
-For adding comments i decided to use bundle, that provides all requested functionality (FOSUserBundle).
+For adding comments i decided to use bundle, that provides all requested functionality (FOSCommentBundle).
 
 Main controller, that contains all methods to work with posts (and API) - `src/Controller/PostController.php`.
-Also, you may check commits log, to have an idea about process of task implementation.
+Also, you may check commits log, to have an idea about process of task implementation. 
+I tried to leave very detailed commits.
 
 Thank you for your time and i hope that my solution will fit your needs!
 
