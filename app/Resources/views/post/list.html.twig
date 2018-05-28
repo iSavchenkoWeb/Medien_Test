@@ -1,0 +1,155 @@
+{% extends "@FOSUser/layout.html.twig" %}
+{% block javascripts %}
+{{ parent() }}
+<script type="text/javascript">
+    $(document).ready(function(){
+        posts.listen();
+    });
+
+    var posts = {
+        listen: function(){
+            $('#appbundle_post_submit').click(function(){
+                var post_content = $('#appbundle_post_content').val();
+                var post_token = $('#appbundle_post__token').val();
+                if(post_content.length < 2)
+                {
+                    highlight('#appbundle_post_content', function(elem, previous_border){
+                        if(elem.value.length >= 2){ 
+                            $(elem).css({border: previous_border});
+                        }
+                    });
+                    return false;
+                }
+                else
+                {
+                    $.ajax({
+                        method: "POST",
+                        url: "/api/posts",
+                        data: { 
+                            appbundle_post: {
+                                content: post_content,
+                                _token: post_token,
+                                submit: 1
+                            }
+                        }
+                    }).done(function( result ) {
+                        if(result.post)
+                        {
+                            $('.no_posts').remove();
+                            $('#appbundle_post_content').val('');
+                            posts.show(result.post);
+                        }
+                        else
+                            alert('Error when adding post');
+                    });
+                }
+                return false;
+            });
+        }, 
+        show: function(post) {
+            var template = '<a class="list_item" href="/post/{0}"> \
+                                    <li> \
+                                        <section class="item_infos"> \
+                                            <h3 class="item_title">{1}</h3> \
+                                            \
+                                            <p class="item_supp">{2}</p> \
+                                            \
+                                            <aside class="item_absolute"> \
+                                                <p class="item_supp" itemprop="availabilityStarts" content="">{3}</p> \
+                                            </aside> \
+                                        </section> \
+                                    </li> \
+                                </a>';
+            var post_html = template.format(post.id, post.author.username, post.content, formatDate(new Date(post.created_at)));
+            $('#posts').prepend(post_html);
+
+        }
+    }
+</script>
+{% endblock %}
+
+{% block fos_user_content %}
+{{ parent() }}
+    <style>
+        .list_item{
+            display: block;
+            text-decoration: none;
+            color: black;
+            padding-left: 10px;
+
+        }
+        .list_item:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .list_item:focus, .list_item:hover{
+            text-decoration: none;
+            color: black;
+            background-color: #E2EBFD;
+        }
+        ul.table{
+            list-style-type: none;
+            padding: 0;
+        }
+    </style>
+    <div class='row'>
+        <div class='col-sm-3'></div>
+        <div class='col-sm-6'>
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div id="create-post-form">
+                            {{ form(postForm) }}
+                            <br>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-12">
+                        <ul id='posts' class="table">
+                            {% for post in posts if posts|length > 0 %}
+                                <a class='list_item' href="{{ path('post', {'id': post.id}) }}">
+                                    <li>
+                                        <section class="item_infos">
+                                            <h3 class="item_title">{{ post.authorName }}</h3>
+                                            
+                                            <p class="item_supp">{{ post.content }}</p>
+                                            
+                                            <aside class="item_absolute">
+                                                <p class="item_supp" itemprop="availabilityStarts" content="{{ post.createdAt | date('Y-m-d H:i:s')}}">{{ post.createdAt | date('Y-m-d H:i:s')}}</p>
+                                            </aside>
+                                        </section>
+                                    </li>
+                                </a>
+                            {% else %}
+                                <div class='no_posts'>
+                                    <td colspan="15">no posts found</td>
+                                </div>
+                            {% endfor %}
+                        </ul>
+                        {% if maxPages >= 1 %}
+                            <ul class="pagination pagination-sm">
+                                {# `«` arrow  #}
+                                <li {{ thisPage == 1 ? 'class="disabled"' }}>
+                                    <a href="{{ path('posts', {p: thisPage-1 < 1 ? 1 : thisPage-1}) }}">«</a>
+                                </li>
+
+                                {# Render each page number #}
+                                {% for i in 1..maxPages %}
+                                <li {{ thisPage == i ? 'class="active"' }}>
+                                <a href="{{ path('posts', {p: i}) }}">{{ i }}</a>
+                                </li>
+                                {% endfor %}
+
+                                {# `»` arrow #}
+                                <li {{ thisPage == maxPages ? 'class="disabled"' }}>
+                                    <a href="{{ path('posts', {p: thisPage+1 <= maxPages ? thisPage+1 : thisPage}) }}">»</a>
+                                </li>
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

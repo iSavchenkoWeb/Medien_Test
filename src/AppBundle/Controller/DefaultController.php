@@ -10,32 +10,14 @@ use Symfony\Component\HttpFoundation\Request;
 class DefaultController extends Controller
 {
     /**
-     * @Route("/", name="homepage")
+     * @Route("/", name="main")
+     * 
      * @param Request $request
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function indexAction(Request $request)
+    public function indexAction()
     {
-        return $this->render('default/index.html.twig', [
-            'base_dir' => realpath($this->getParameter('kernel.project_dir')).DIRECTORY_SEPARATOR,
-        ]);
-    }
-    
-    /**
-     * @Route("/posts", name="posts")
-     * @param Request $request
-     *
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function postsAction(Request $request)
-    {
-        $postForm = $this->createForm(PostType::class, new Post());
-        $posts = $this->getDoctrine()->getRepository('AppBundle:Post')->findAll();
-        
-        return $this->render('default/posts.html.twig', [
-            'postForm' => $postForm->createView(),
-            'posts' => $posts
-        ]);
+        return $this->redirectToRoute('posts');
     }
 }
