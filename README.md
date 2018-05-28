@@ -31,3 +31,49 @@ What's already done
     * `FOSRestBundle`
     * `FOSUserBundle`
     * `JMSSerializerBundle`
+
+
+Ihor comments
+=============================
+
+Installation steps
+-------------------
+1) install and configure
+2) install and configure webserver (should point into /web directory)
+3) run composer install
+4) run composer update
+5) php bin/console doctrine:schema:update --force
+6) run ./vendor/phpunit, check if no errors on tests
+
+You are free to go with APP :)
+
+Message
+-------------------
+Hello! Thank you for such detailed task description.
+
+First of all, i should say that i had an experience with Symfony 2, like a 2 years ago. 
+So i checked what changed in new versions of Symfony, but i had like an hour on this (so if you see some old methods used, you know why) :)
+
+Answering your question, what i did about performance optimization:
+1) connected APP to Redis; 
+2) moved sessions to Redis;
+3) enabled doctrine to use Redis as cach;
+4) in a most huge request - posts list (api/posts) i enabled object caching using Redis.
+
+Also, for performance increase i configured mysql server to use query cache (SET GLOBAL query_cache_type = 1;)
+
+For adding comments i decided to use bundle, that provides all requested functionality (FOSUserBundle).
+
+Thank you for your time and i hope that my solution will fit your needs!
+
+
+What could be improved?
+-------------------
+Well, a lot of things. Most important ones (IMHO):
+1) Put email outboung into queue
+2) Open API for public and add OAuth for this purpose
+3) Create a profile page, also provide a possibility to create OAuth API key here
+4) Add media content to posts.
+5) Add a powerfull post input (like tinyMCE)
+6) Show a comments count on each posts in a posts list
+7) Style all of this
