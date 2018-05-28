@@ -26,19 +26,55 @@ framework:
     trusted_hosts: ~
     session:
         # https://symfony.com/doc/current/reference/configuration/framework.html#handler-id
-        handler_id: session.handler.native_file
-        save_path: '%kernel.project_dir%/var/sessions/%kernel.environment%'
+        handler_id: snc_redis.session.handler
     fragments: ~
     http_method_override: true
     assets: ~
     php_errors:
         log: true
-
+    cache:
+        app: cache.adapter.redis
+        default_redis_provider: 'redis://%redis_host%:%redis_port%'
+snc_redis:
+    clients:
+        default:
+            type: predis
+            alias: default
+            dsn: 'redis://%redis_host%:%redis_port%'
+            logging: '%kernel.debug%'
+        cache:
+            type: predis
+            alias: cache
+            dsn: 'redis://%redis_host%:%redis_port%'
+            logging: '%kernel.debug%'
+            options:
+                connection_timeout: 10
+                read_write_timeout: 30
+    session:
+        client: default
+        prefix: chtest_
+    doctrine:
+        metadata_cache:
+            client: cache
+            entity_manager: default
+            document_manager: default
+        result_cache:
+            client: cache
+            entity_manager: [default, read]
+            document_manager: [default, slave1, slave2]
+            namespace: "dcrc:"
+        query_cache:
+            client: cache
+            entity_manager: default
+        second_level_cache:
+            client: cache
+            entity_manager: default
 # Twig Configuration
 twig:
     debug: '%kernel.debug%'
     strict_variables: '%kernel.debug%'
-
+    cache: false
+    form_themes: ['bootstrap_4_layout.html.twig']
 # Doctrine Configuration
 doctrine:
     dbal:
@@ -60,12 +96,66 @@ doctrine:
         auto_generate_proxy_classes: '%kernel.debug%'
         naming_strategy: doctrine.orm.naming_strategy.underscore
         auto_mapping: true
-
+fos_user:
+    service:
+        mailer: fos_user.mailer.twig_swift
+    resetting:
+        email:
+            template:   email/password_resetting.email.twig
+    registration:
+        confirmation:
+            enabled: true
+            template:   '@FOSUser/Registration/email.txt.twig'
+            from_email:
+                address:        Rundschau_Medien@magazine.ch
+                sender_name:    Rundschau Medien AG
+fos_rest:
+    param_fetcher_listener: true
+    view:
+        view_response_listener: 'force'
+        formats:
+            xml:  true
+            json: true
+        templating_formats:
+            html: true
+    format_listener:
+        rules:
+            - { path: ^/api/threads, priorities: [ html, '*/*'], fallback_format: ~, prefer_extension: true }
+            - { path: ^/api, priorities: [ json, xml, html ], fallback_format: ~, prefer_extension: true }
+            - { path: '^/', priorities: [ 'html', '*/*'], fallback_format: ~, prefer_extension: true }
+    exception:
+        codes:
+            'Symfony\Component\Routing\Exception\ResourceNotFoundException': 404
+            'Doctrine\ORM\OptimisticLockException': HTTP_CONFLICT
+        messages:
+            'Symfony\Component\Routing\Exception\ResourceNotFoundException': true
+    allowed_methods_listener: true
+    access_denied_listener:
+        json: true
+    body_listener: true
+    disable_csrf_role: ROLE_API
+fos_comment:
+    acl: true
+    db_driver: orm
+    class:
+        model:
+            comment: AppBundle\Entity\Comment
+            thread: AppBundle\Entity\Thread
+    service:
+        acl:
+            comment: appbundle.acl.comment.roles
+assetic:
+    debug:          '%kernel.debug%'
+    use_controller: '%kernel.debug%'
+    filters:
+        cssrewrite: ~
+    bundles: [ "FOSCommentBundle" ]     
 # Swiftmailer Configuration
 swiftmailer:
     transport: '%mailer_transport%'
     host: '%mailer_host%'
     username: '%mailer_user%'
     password: '%mailer_password%'
-    spool: { type: memory }
-
+    encryption: ssl
+    auth_mode: login
+    port: 465
